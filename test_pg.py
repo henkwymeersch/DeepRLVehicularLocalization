@@ -60,9 +60,6 @@ params['fim_gps_master'] = gps_fim_master
 
 data = pd.DataFrame(columns=headers)
 n_objective_reached = np.ones(params['num_iterations'])
-# data = pd.DataFrame()
-# for h, t in zip(headers, types):
-#     data[h] = pd.Series(dtype=t)
 
 scenarios = list()
 for scenario_idx in range(params['num_scenarios']):
@@ -72,9 +69,7 @@ epsd_idx = 0
 
 
 with tf.Session() as sess:
-    # sess.run(tf.global_variables_initializer())
     tf.saved_model.loader.load(sess, ['serve'], params['saving_path'])
-    # dqn.restore(sess, 'tf_models')
     graph = tf.get_default_graph()
     print(graph.get_operations())
 
@@ -92,7 +87,6 @@ with tf.Session() as sess:
                 agt_idx = itr_idx % len(scenario.links)
             else:
                 agt_idx = np.random.randint(0, len(scenario.links))
-                # agt_idx = 0
             agt = scenario.links[agt_idx]
             exe_agts[scnr_idx, agt_idx] += 1
 
@@ -109,19 +103,10 @@ with tf.Session() as sess:
         prob = sess.run('p:0', feed_dict={'state:0': input_state})
         # actions = np.random.choice(range(prob.shape[1]), p=prob[0, :])
         actions = np.argmax(prob, axis=1)
-        # actions = 1
-        # if prob[0, 1] > 0.8:
-        #     actions = 1
-        # else:
-        #     actions = 0
 
         for idx, scenario in enumerate(scenarios):
             if scenario.objective_achieved(params):
                 actions[idx] = 0
-
-        # for idx, scenario in enumerate(scenarios):
-        #     if np.sum(scenario.cumulative_actions) >= 15:
-        #         actions[idx] = 0
 
         data_this_epsd_iter['action'] = actions
         for row_idx in range(data_this_epsd_iter.shape[0]):
@@ -132,9 +117,6 @@ with tf.Session() as sess:
             all_var.append(np.diag(scenarios[scnr_idx].var))
 
         data_this_epsd = pd.concat([data_this_epsd, data_this_epsd_iter], axis=0, ignore_index=True)
-        # if actions[0] == 1:
-        #     scenarios[0].plot(scenarios[0].pebs)
-        #     pass
 
         if itr_idx % 100 == 0:
             print(itr_idx)
@@ -144,9 +126,4 @@ with tf.Session() as sess:
         n_reached = np.mean(list(map(lambda s: sum((s.pebs < params['objective_peb'] * 1)), scenarios)))
         n_objective_reached[itr_idx] = n_reached
 
-    # objective_achieved = [scenario.objective_achieved(params) for scenario in scenarios] * 1
-    # n_measurements = [np.sum(scenario.cumulative_actions) for scenario in scenarios]
-    # pl.dump([objective_achieved, n_measurements], open('results/performance_pg.p', 'wb'))
-    # pebs = np.concatenate([scenario.pebs for scenario in scenarios])
-    # pl.dump(pebs, open('results/pebs_pg.p', 'wb'))
     pl.dump(n_objective_reached, open('results/performance_pg.p', 'wb'))

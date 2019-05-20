@@ -37,25 +37,16 @@ class PolicyGradient:
                                      axis=1)
         self._loss = tf.reduce_mean(neg_log_prob * self._rwd)
         self._optimizer = tf.train.AdamOptimizer(params['lr']).minimize(self._loss)
-        # self._optimizer = tf.train.GradientDescentOptimizer(params['lr']).minimize(self._loss)
 
     def train(self, data, params, sess, epsd, prvs_loss):
         states = (np.array(data[params['state_def']], dtype=np.float32) - params['m']) / params['s']
-        # rewards = (np.array(data['reward']) - params['m_reward']) / params['s_reward']
         rewards = calc_scnr_rwd(data, params)
-        # rewards = np.empty(data.shape[0])
-        # for idx in range(data.shape[0]):
-        #     rewards[idx] = scnr_rewards[data.loc[idx, 'scnr']]
         rewards = (rewards - params['m_reward']) / params['s_reward']
         actions = np.array(data['action'])
         _, loss_value = sess.run([self._optimizer, self._loss], feed_dict={self._state: states,
                                                                            self._rwd: rewards,
                                                                            self._actions: actions})
 
-        # if not np.isnan(loss_value):
-        #     if os.path.exists(params['saving_path']):
-        #         s2t.send2trash(params['saving_path'])
-        #     tf.saved_model.simple_save(sess, params['saving_path'], {'state': self._state}, {'prob': self._prob})
         return loss_value
 
     def choose_action(self, states, sess, params):

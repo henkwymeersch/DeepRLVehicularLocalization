@@ -20,14 +20,6 @@ class DQN:
         self._target_q = tf.placeholder(shape=[None, len(params['actions'])], dtype=tf.float32, name='target_q')
         self._action_mask = tf.placeholder(shape=[None, len(params['actions'])], dtype=tf.float32)
 
-        # fc1 = tf.layers.dense(self._state, num_neurons, activation=tf.nn.relu,
-        #                       kernel_initializer=tf.contrib.layers.xavier_initializer())
-        # fc2 = tf.layers.dense(fc1, num_neurons, activation=tf.nn.relu,
-        #                       kernel_initializer=tf.contrib.layers.xavier_initializer())
-        # fc3 = tf.layers.dense(fc2, num_neurons, activation=tf.nn.relu,
-        #                       kernel_initializer=tf.contrib.layers.xavier_initializer())
-        # self._q = tf.layers.dense(fc3, len(params['actions']), name='q')
-
         eval_c_name = ['eval_c_name', tf.GraphKeys.GLOBAL_VARIABLES]
         w1 = tf.get_variable('w1', [state_dim, num_neurons],
                              initializer=tf.contrib.layers.xavier_initializer(seed=1), collections=eval_c_name)
@@ -54,7 +46,6 @@ class DQN:
         self._loss = tf.losses.mean_squared_error(tf.multiply(self._target_q, self._action_mask),
                                                   tf.multiply(self._q, self._action_mask))
         self._optimizer = tf.train.AdamOptimizer(0.001).minimize(self._loss)
-        # self._optimizer = tf.train.GradientDescentOptimizer(0.001).minimize(self._loss)
 
         if params['double_dqn']:
             tgt_c_name = ['tgt_c_name', tf.GraphKeys.GLOBAL_VARIABLES]
@@ -97,12 +88,7 @@ class DQN:
             states = np.array(data.loc[idcs_selected_rows, params['state_def']], dtype=np.float32)
             states = normalize_state(states, params['m'], params['s'])
             q = np.reshape(np.array(data.loc[idcs_selected_rows, 'q']), (batch_size, 1))
-            # mask = np.zeros((batch_size, 2))
-            # for sample_idx in range(batch_size):
-            #     if data.loc[idcs_selected_rows[sample_idx], 'action'] != 0:
-            #         mask[sample_idx, 1] = 1
-            #     else:
-            #         mask[sample_idx, 0] = 1
+
             if params['inherit_q']:
                 current_q = sess.run(self._q, feed_dict={self._state: states})
                 for idx in range(batch_size):
@@ -117,10 +103,6 @@ class DQN:
                                                                                self._state: states})
 
             all_loss_values[batch_idx] = loss_value
-            # if prvs_loss * 1.5 > loss_value and epsd % 4 == 0:
-            #     if os.path.exists(params['saving_path']):
-            #         s2t.send2trash(params['saving_path'])
-            #     tf.saved_model.simple_save(sess, params['saving_path'], {'state': self._state},  {'q': self._q})
 
         return np.mean(all_loss_values)
 
@@ -190,7 +172,6 @@ def epsilon_greedy(epsilon, q=None):
         # return 1 -  np.random.randint(0, num_actions, num_predictions) * 0
     else:
         return [np.argmax(this_q) for this_q in q]
-        # return 1 - np.array([np.argmax(this_q) for this_q in q]) * 0
 
 
 def return_state_p(data: pd.DataFrame, params):

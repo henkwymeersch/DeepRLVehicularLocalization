@@ -200,8 +200,6 @@ with tf.Session() as sess:
         postponed_data['n_ngbrs_p'] = postponed_data['n_ngbrs_p'].astype('int')
         data_this_epsd = pd.concat([data_this_epsd, postponed_data], axis=1)
 
-        # data = pd.concat([data, data_this_epsd], axis=0, ignore_index=True, sort=False)  # concatenate data
-
         if epsd_idx == 0 and False:
             m, s = calc_mean_std(data_this_epsd, params)
             print('m = np.array({})'.format(list(m)))
@@ -209,7 +207,6 @@ with tf.Session() as sess:
             params['m'] = m
             params['s'] = s
         # Train DNN
-        # data['q'] = data['reward_p']
         if training_idx > 0:
             updated_q = dqn.update_q(data_this_epsd, sess, params)  # difference in double DQN
             data_this_epsd['q'] = updated_q

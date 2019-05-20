@@ -29,7 +29,7 @@ class Scenario:
                     self.nds.append(nd)
         else:
             # randomly distributed nodes to be implemented.
-            pass
+            raise NotImplementedError
 
         # define sets of adj
         self.links = list()
@@ -41,9 +41,7 @@ class Scenario:
                         if [nd_idx2, nd_idx1] not in self.links:
                             self.links.append([nd_idx1, nd_idx2])
 
-        # master_idx = np.random.randint(2) * 8
         master_idx = np.random.randint(len(self.nds))
-        # master_idx = 0
         self.nds[master_idx]['prior_fim'] = fim_gps_master
         self.master_idx = master_idx
         self.fim_gps = fim_gps
@@ -99,12 +97,6 @@ class Scenario:
         for nd_idx in adj_nds:
             if self.pebs[nd_idx] > params['objective_peb']:
                 n_unfinished_nds += 1
-        # crnt_pebs = self.pebs
-        # for nd_idx3 in range(len(self.nds)):
-        #     if nd_idx3 != nd_idx1 and nd_idx3 != nd_idx2:
-        #         if [nd_idx1, nd_idx3] in self.links or [nd_idx2, nd_idx3] in self.links:
-        #             if crnt_pebs[nd_idx3] > params['objective_peb']:
-        #                 n_unfinished_nds += 1
 
         return delta_x, delta_y, var1x, var1y, var2x, var2y, varxx, varyy, n_unfinished_nds
 
@@ -119,8 +111,6 @@ class Scenario:
                                   rltv_pos[1] / l ** 2, -rltv_pos[0] / l ** 2]])
             indices_c = np.array([nd_idx1 * 2, nd_idx1 * 2 + 1, nd_idx2 * 2, nd_idx2 * 2 + 1], dtype=np.int8)
             c = self.var[np.reshape(indices_c, (4, 1)), indices_c]
-            # sigma_l = params['noise_l_max'] * l / params['radar.r_max']
-            # sigma_theta = params['noise_alpha_max'] * l / params['radar.r_max']
             sigma_l = params['sigma_l']
             sigma_theta = params['sigma_alpha']
             sigma = np.diag([sigma_l ** 2, sigma_theta ** 2])
@@ -147,8 +137,6 @@ class Scenario:
                                   rltv_pos[1] / l ** 2, -rltv_pos[0] / l ** 2]])
             indices_c = np.array([nd_idx1 * 2, nd_idx1 * 2 + 1, nd_idx2 * 2, nd_idx2 * 2 + 1], dtype=np.int8)
             c = self.var[np.reshape(indices_c, (4, 1)), indices_c]
-            # sigma_l = params['noise_l_max'] * l / params['radar.r_max']
-            # sigma_theta = params['noise_alpha_max'] * l / params['radar.r_max']
             sigma_l = params['sigma_l']
             sigma_theta = params['sigma_alpha']
             sigma = np.diag([sigma_l ** 2, sigma_theta ** 2])
@@ -159,10 +147,6 @@ class Scenario:
             updated_var = np.maximum(updated_var, min_var)
             peb1 = np.sqrt(updated_var[0, indices_c[0]] + updated_var[1, indices_c[1]])
             peb2 = np.sqrt(updated_var[2, indices_c[2]] + updated_var[3, indices_c[3]])
-
-            # debug
-            # print(peb1)
-            # print(peb2)
 
             if self.pebs[nd_idx1] > params['objective_peb'] > peb1:
                 return 1
@@ -230,7 +214,6 @@ class Scenario:
         plt.axis('equal')
         plt.xlim((-1, self.xlim))
         plt.ylim((-1, self.ylim))
-        # plt.gcf().set_figheight(3)
         plt.xlabel('x (m)')
         plt.ylabel('y (m)')
 
@@ -293,7 +276,6 @@ def find_next_state_idcs(data: pd.DataFrame):
 
 
 def find_state_p(data: pd.DataFrame, idcs_next_states, params):
-    # valid_idcs = [i is not None for i in idcs_next_states]
     valid_idcs = np.where(np.array(idcs_next_states) != None)[0]
     idcs_next_states_without_none = [idcs_next_states[p] for p in valid_idcs]
     delta_x = [None] * len(idcs_next_states)
@@ -317,12 +299,6 @@ def find_state_p(data: pd.DataFrame, idcs_next_states, params):
         varyy[index] = data.loc[value, 'varyy']
         n_ngbrs[index] = int(data.loc[value, 'n_ngbrs'])
 
-    # delta_x = list(data.loc[idcs_next_states, 'delta_x'])
-    # delta_y = list(data.loc[idcs_next_states, 'delta_y'])
-    # var1x = list(data.loc[idcs_next_states, 'var1x'])
-    # var1y = list(data.loc[idcs_next_states, 'var1y'])
-    # var2x = list(data.loc[idcs_next_states, 'var2x'])
-    # var2y = list(data.loc[idcs_next_states, 'var2y'])
     return delta_x, delta_y, var1x, var1y, var2x, var2y, varxx, varyy, n_ngbrs
 
 
@@ -367,7 +343,7 @@ def calc_reward_v2(data: pd.DataFrame, state_p_idcs, params, sparse=None):
     reward += params['terminal_reward'] * claim_reward
 
     if not sparse:
-        pass  # to be implemented
+        raise NotImplementedError
 
     reward -= params['cost_mea'] * data.loc[0: n_rows, 'action']
 
@@ -392,7 +368,7 @@ def calc_reward_greedy(data: pd.DataFrame, all_ber, params, sparse=None):
     reward += params['terminal_reward'] * claim_reward
 
     if not sparse:
-        pass  # to be implemented
+        raise NotImplementedError
 
     reward -= params['cost_mea'] * data.loc[0: n_rows, 'action']
 
@@ -473,6 +449,5 @@ def calc_scnr_rwd(data, params):
         scnr_idcs = data.index[data['scnr'] == scnr_idx].tolist()
 
         for idx in range(len(scnr_idcs)):
-            # rewards[scnr_idcs[idx]] = np.sum(np.maximum(scnr_reward[idx:], 0))
             rewards[scnr_idcs[idx]] = np.sum(scnr_reward)
     return rewards - np.mean(rewards)
