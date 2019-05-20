@@ -6,8 +6,10 @@ This Python code learns and executes decentralized scheduling for cooperative lo
 
 ## Usage
 The code is used as follows (example for PG):
-* Run train_PG to train the policy network. The file contains several parameters that can be modified by the user (lines 9-58). 
-* Run test_PG to test the policy. The file also contains parameters that can be set to be different or the same as train_PG. This allows centralized training on a small network and distributed testing on a larger network. 
+* Run train_PG to train the policy network. The file contains several parameters that can be modified by the user (lines 9-58).
+* The trained model will be saved in the folder named "tf_models". Each model is saved in a separated folder. Name the folder "current" for the model you would like to test.
+* Run test_PG to test the policy. The file also contains parameters that can be set to be different or the same as train_PG (i.e. "num_nds" and "num_lanes"). This allows centralized training on a small network and distributed testing on a larger network.
+* Visualize the result with Environment.plot(). Use PEBs of all nodes as argument if you want to show PEBs in the figure.
 
 ## Authors
 The code was authored by Dr. Bile Peng, while he was a Postdoctoral Researcher at Chalmers University of Technology. For questions, please contact <bile.peng@gmail.com>
