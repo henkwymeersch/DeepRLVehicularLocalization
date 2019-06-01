@@ -17,7 +17,8 @@ The code was authored by Dr. Bile Peng, while he was a Postdoctoral Researcher a
 ## If you use this code
 If you use or extend this code, please cite our work. 
 
-B. Peng, G. Seco-Granados, E. Steinmetz, M. Frohle and H. Wymeersch, "Decentralized Scheduling for Cooperative Localization with Deep Reinforcement Learning," in *IEEE Transactions on Vehicular Technology*.
+B. Peng, G. Seco-Granados, E. Steinmetz, M. Fröhle and H. Wymeersch, "Decentralized Scheduling for Cooperative Localization With Deep Reinforcement Learning," in *IEEE Transactions on Vehicular Technology*, vol. 68, no. 5, pp. 4295-4305, May 2019.
+doi: 10.1109/TVT.2019.2913695
 
 ```
 @ARTICLE{PenSecSteFroWym:19,
